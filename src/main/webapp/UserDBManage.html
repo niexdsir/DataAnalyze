@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>数据库管理</title>
+    <link rel="stylesheet" href="./layui/css/layui.css">
+</head>
+<style type="text/css">
+ .ConFormDiv{
+     height: 400px;
+     width: 400px;
+     position: absolute;
+     top: 60px;
+     bottom: 0;
+     left: 100px;
+     right: 0;
+ }
+ .TabResDiv{
+     position: absolute;
+     top: 60px;
+     bottom: 0;
+     left: 600px;
+     right: 0;
+ }
+</style>
+<body>
+<script src="./layui/layui.js"></script>
+<script src="js/jquery.js"></script>
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo layui-hide-xs layui-bg-black">字典管理</div>
+        <!-- 头部区域（可配合layui 已有的水平导航） -->
+
+
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul class="layui-nav layui-nav-tree" lay-filter="test">
+                <li class="layui-nav-item">
+                    <a class="" href="javascript:;" >数据集管理</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="UserDataIn.html" >数据集导入</a></dd>
+                        <dd><a href="UserHisData.html">历史数据集</a></dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item layui-bg-green" >
+                    <a href="javascript:;" id="group2">数据库管理</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body">
+        <div class="ConFormDiv">
+            <form  action="" id="DBConForm" method="post">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">IP地址</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="IP" value="localhost" lay-verify="title" autocomplete="off" placeholder="输入IP地址" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">用户名</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="Name" value="root" lay-verify="required"  placeholder="输入用户名" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">密码</label>
+                    <div class="layui-input-block">
+                        <input type="password" name="Password" value="wang123" placeholder="输入密码" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">端口号</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="Port" lay-verify="required"  placeholder="输入端口号" autocomplete="off" class="layui-input" value="3306">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">数据库名</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="DBName" value="dataanalyze"  placeholder="输入数据库名" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+
+            </form>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button  class="layui-btn" onclick="getDBConAndData()" >建立连接</button>
+                </div>
+            </div>
+        </div>
+        <div class="TabResDiv">
+            <div id="test2" class="demo-tree"></div>
+        </div>
+    </div>
+
+    <div class="layui-footer">
+
+    </div>
+</div>
+<script>
+    function getTree(data1){
+            layui.use(['tree', 'util'], function(){
+            var tree = layui.tree
+            ,layer = layui.layer
+            ,util = layui.util
+                tree.render({
+                    elem: '#test2'
+                    ,data: data1
+                    ,onlyIconControl: true  //是否仅允许节点左侧图标控制展开收缩
+                    ,click: function(obj){
+                        layer.msg(JSON.stringify(obj.data));
+                    }
+                });
+            });
+    }
+</script>
+<script>
+    function getDBConAndData(){
+        var url = "servlet?method=getDBConAndData&randnum=" + Math.random();
+        $.ajax({
+            type: "get",
+            url: url,
+            data:$('#DBConForm').serialize(),
+            dataType: "json",
+            success: function(result){
+                if(result=="false")layer.alert("连接失败")
+                else {
+                    getTree(result)
+                }
+            },
+            error: function(){
+                alert("错误");
+            }
+        });
+    }
+</script>
+
+
+<script>
+    //JS
+    layui.use(['element', 'layer', 'util'], function(){
+        var element = layui.element
+            ,layer = layui.layer
+            ,util = layui.util
+            ,$ = layui.$;
+
+        //头部事件
+        util.event('lay-header-event', {
+            //左侧菜单事件
+            menuLeft: function(othis){
+                layer.msg('展开左侧菜单的操作', {icon: 0});
+            }
+            ,menuRight: function(){
+                layer.open({
+                    type: 1
+                    ,content: '<div style="padding: 15px;">处理右侧面板的操作</div>'
+                    ,area: ['260px', '100%']
+                    ,offset: 'rt' //右上角
+                    ,anim: 5
+                    ,shadeClose: true
+                });
+            }
+        });
+
+    });
+</script>
+</body>
+</html>

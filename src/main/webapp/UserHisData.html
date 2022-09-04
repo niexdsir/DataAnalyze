@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>历史数据集</title>
+  <link rel="stylesheet" href="./layui/css/layui.css">
+</head>
+<style type="text/css">
+  .HisTabDiv{
+    height: 400px;
+    width: 1000px;
+    position: absolute;
+    top: 20px;
+    bottom: 0;
+    left: 100px;
+    right: 0;
+  }
+  .DictiDiv{
+    position: absolute;
+    top: 410px;
+    bottom: 0;
+    left: 100px;
+    right: 0;
+  }
+</style>
+<body>
+
+<div class="layui-layout layui-layout-admin">
+  <div class="layui-header">
+    <div class="layui-logo layui-hide-xs layui-bg-black">字典管理</div>
+    <!-- 头部区域（可配合layui 已有的水平导航） -->
+
+
+  </div>
+
+  <div class="layui-side layui-bg-black">
+    <div class="layui-side-scroll">
+      <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+      <ul class="layui-nav layui-nav-tree" lay-filter="test">
+        <li class="layui-nav-item layui-nav-itemed">
+          <a class="" href="javascript:;" >数据集管理</a>
+          <dl class="layui-nav-child">
+            <dd><a href="UserDataIn.html" >数据集导入</a></dd>
+            <dd><a href="UserHisData.html" class="layui-bg-green">历史数据集</a></dd>
+          </dl>
+        </li>
+        <li class="layui-nav-item">
+          <a href="UserDBManage.html" id="group2">数据库管理</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="layui-body">
+
+
+
+    <div class="HisTabDiv">
+      </br>
+      <h2 align="center">历史数据表格</h2>
+      </br>
+    <table class="layui-hide" id="HisTab" lay-filter="HisEvent"></table>
+    <script type="text/html" id="barDemo">
+      <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">字典</a>
+      <a class="layui-btn layui-btn-xs" lay-event="out">导出</a>
+      <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    </script>
+      <script type="text/html" id="DictMethod">
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+      </script>
+  </div>
+  </div>
+  <div class="layui-footer">
+
+  </div>
+</div>
+<script src="./layui/layui.js"></script>
+<script src="js/jquery.js"></script>
+<script>
+
+  layui.use('table', function () {
+    var table = layui.table;
+
+    table.render({
+      elem: '#HisTab'
+      , url: 'servlet?method=HisTab'
+      ,width:1000
+      , cellMinWidth: 200 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+      , cols: [[
+        {field: 'tabname', title: '数据名称' ,align: 'center',event: 'ChangeTabname'}
+        , {field: 'crtime', width: 160, title: '创建时间',edit: 'text'}
+        , {field: 'user', width: 160, title: '创建者ID', sort: true}
+        , {fixed: 'right', title:"操作", width:178, align:'center', toolbar: '#barDemo'}
+
+      ]]
+
+    });
+    layui.use('table', function(){
+      var table = layui.table;
+      //监听单元格事件
+      table.on('tool(HisEvent)', function(obj){
+        var data = obj.data;
+        if(obj.event === 'detail'){
+          PopWindows(data.tabname);
+        } else if(obj.event === 'del'){
+          layer.confirm('确定删除这个数据集吗？', function(index){
+            DeleteOneHistory(data.tabid,data.tabname);
+            obj.del();
+            layer.close(index);
+          });
+        }
+        else if(obj.event === 'ChangeTabname'){
+          layer.prompt({
+            formType: 2
+            ,title: '将表名修改为:'
+            ,value: data.tabname
+          }, function(value, index){
+            layer.close(index);
+            //这里一般是发送修改的Ajax请求
+            ChangeTabName(data.tabname,value);
+            //同步更新表格和缓存对应的值
+            obj.update({
+              tabname: value
+            });
+          });
+        }
+        else if(obj.event === 'out'){
+          OutData(data.tabname);
+        }
+      });
+      table.on('tool(demoEvent)', function(obj){
+        var data = obj.data;
+        if(obj.event === 'setbeizhu'){
+          layer.prompt({
+            formType: 2
+            ,title: '修改 ID 为 ['+ data.ywname +'] 的用户签名'
+            ,value: data.beizhu
+          }, function(value, index){
+            layer.close(index);
+
+            //这里一般是发送修改的Ajax请求
+
+            //同步更新表格和缓存对应的值
+            obj.update({
+              beizhu: value
+            });
+          });
+        }
+      });
+    });
+
+  });
+
+</script>
+<script>
+  function PopWindows(name){
+    layer.open({
+      type: 2,
+      area: ['1000px', '700px'],
+      title: name+"字典",
+      fixed: false, //不固定
+      maxmin: true,
+      content: 'PopTable.html?tabname='+name,
+      success: function (layero, index) {
+        var body = layer.getChildFrame('body', index);
+        body.find("[name='tabname']").val(name);
+      }
+    });
+  }
+</script>
+<script>
+  function OutData(TName){
+    var url = "servlet?method=OutData&tabname="+TName;
+    $.ajax({
+      type: "get",
+      url: url,
+      data:[],
+      dataType: "json",
+      success: function(result){
+        layer.alert('导出完成');
+      },
+      error: function(){
+        alert("error");
+      }
+    });
+  }
+</script>
+<script>
+  function ChangeTabName(Tname,NewName){
+    var url = "servlet?method=ChangeTabName&tabname="+Tname+"&NewName="+NewName;
+    $.ajax({
+      type: "get",
+      url: url,
+      data:[],
+      dataType: "json",
+      success: function(result){
+
+      },
+      error: function(){
+        alert("error");
+      }
+    });
+  }
+</script>
+<script>
+  function DeleteOneHistory(tabid,tname){
+    var url = "servlet?method=DeleteOneHistory&tabid="+tabid+"&tabname="+tname;
+    $.ajax({
+      type: "get",
+      url: url,
+      data:[],
+      dataType: "json",
+      success: function(result){
+
+      },
+      error: function(){
+        alert("error");
+      }
+    });
+  }
+</script>
+<script>
+  //JS
+  layui.use(['element', 'layer', 'util'], function(){
+    var element = layui.element
+            ,layer = layui.layer
+            ,util = layui.util
+            ,$ = layui.$;
+
+    //头部事件
+    util.event('lay-header-event', {
+      //左侧菜单事件
+      menuLeft: function(othis){
+        layer.msg('展开左侧菜单的操作', {icon: 0});
+      }
+      ,menuRight: function(){
+        layer.open({
+          type: 1
+          ,content: '<div style="padding: 15px;">处理右侧面板的操作</div>'
+          ,area: ['260px', '100%']
+          ,offset: 'rt' //右上角
+          ,anim: 5
+          ,shadeClose: true
+        });
+      }
+    });
+
+  });
+</script>
+</body>
+</html>

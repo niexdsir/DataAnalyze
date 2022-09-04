@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  <link rel="stylesheet" href="./layui/css/layui.css">
+</head>
+<body>
+<script src="./layui/layui.js"></script>
+<script src="js/jquery.js"></script>
+<div id="test2" class="demo-tree"></div>
+</body>
+<script>
+  layui.use(['tree', 'util'], function(){
+    var tree = layui.tree
+            ,layer = layui.layer
+            ,util = layui.util
+
+            //模拟数据
+
+            //模拟数据1
+            ,data1 = [{
+              title: '江西'
+              ,id: 1
+              ,children: [{
+                title: '南昌'
+                ,id: 1000
+                ,children: [{
+                  title: '青山湖区'
+                  ,id: 10001
+                },{
+                  title: '高新区'
+                  ,id: 10002
+                }]
+              },{
+                title: '九江'
+                ,id: 1001
+              },{
+                title: '赣州'
+                ,id: 1002
+              }]
+            },{
+              title: '广西'
+              ,id: 2
+              ,children: [{
+                title: '南宁'
+                ,id: 2000
+              },{
+                title: '桂林'
+                ,id: 2001
+              }]
+            },{
+              title: '陕西'
+              ,id: 3
+              ,children: [{
+                title: '西安'
+                ,id: 3000
+              },{
+                title: '延安'
+                ,id: 3001
+              }]
+            }]
+
+            //模拟数据2
+
+    tree.render({
+      elem: '#test2'
+      ,data: data1
+      ,onlyIconControl: true  //是否仅允许节点左侧图标控制展开收缩
+      ,click: function(obj){
+        layer.msg(JSON.stringify(obj.data));
+      }
+    });
+  });
+</script>
+</html>

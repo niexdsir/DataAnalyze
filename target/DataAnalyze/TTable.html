@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="layui/css/layui.css">
+</head>
+<body>
+<button onclick="show()">点击1</button>
+
+<table class="layui-hide" id="test" lay-filter="demoEvent"></table>
+
+
+<script src="layui/layui.js"></script>
+
+<script>
+    layer.open({
+        type: 2,
+        area: ['1000px', '700px'],
+        title: '字典表格',
+        fixed: false, //不固定
+        maxmin: true,
+        content: 'PopTable.html',
+        success: function (layero, index) {
+            var body = layer.getChildFrame('body', index);
+            body.find("[name='tabname']").val("2018年软件基地年报1130000201908061025461");
+        }
+    });
+</script>
+<script>
+
+        layui.use('table', function () {
+            var table = layui.table;
+
+            table.render({
+                elem: '#test'
+                , url: 'servlet?method=Ttable'
+                , cellMinWidth: 200 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+                , cols: [[
+                    {field: 'ywname', width: 160, title: '英文名称', sort: true}
+                    , {field: 'zwname', width: 160, title: '中文名称',edit: 'text'}
+                    , {field: 'danwei', width: 60, title: '单位'}
+                    , {field: 'zdtype', width: 80, title: '字段类型'}
+                    , {field: 'beizhu', width: 160, title: '备注',event: 'setbeizhu',style:'cursor: pointer;'}
+                    , {field: 'ispri', width: 60 , title: '主键'}
+                    , {field: 'chtime', width: 160, title: '修改时间'}
+                ]]
+
+            });
+            layui.use('table', function(){
+                var table = layui.table;
+                //监听单元格事件
+                table.on('tool(demoEvent)', function(obj){
+                    var data = obj.data;
+                    if(obj.event === 'setbeizhu'){
+                        layer.prompt({
+                            formType: 2
+                            ,title: '修改 ID 为 ['+ data.ywname +'] 的用户签名'
+                            ,value: data.beizhu
+                        }, function(value, index){
+                            layer.close(index);
+
+                            //这里一般是发送修改的Ajax请求
+
+                            //同步更新表格和缓存对应的值
+                            obj.update({
+                                beizhu: value
+                            });
+                        });
+                    }
+                });
+            });
+
+        });
+
+</script>
+
+<script>
+    layui.use('table', function(){
+        var table = layui.table;
+        //监听单元格事件
+        table.on('tool(demoEvent)', function(obj){
+            var data = obj.data;
+            if(obj.event === 'setbeizhu'){
+                layer.prompt({
+                    formType: 2
+                    ,title: '修改 ID 为 ['+ data.ywname +'] 的用户签名'
+                    ,value: data.beizhu
+                }, function(value, index){
+                    layer.close(index);
+
+                    //这里一般是发送修改的Ajax请求
+
+                    //同步更新表格和缓存对应的值
+                    obj.update({
+                        beizhu: value
+                    });
+                });
+            }
+        });
+    });
+</script>
+</body>
+</html>
